@@ -11,6 +11,7 @@ Directory | Tutorial
 [generics](./generics/) | [Getting started with generics](https://go.dev/doc/tutorial/generics)
 [fuzzing](./fuzzing/) | [Getting started with fuzzing](https://go.dev/doc/tutorial/fuzz)
 [vulnerabilities](./vulnerabilities/) | [Find and fix vulnerable dependencies with govulncheck](https://go.dev/doc/tutorial/govulncheck)
+[go-tour](./go-tour/) | [A Tour of Go](https://go.dev/tour/list)
 
 ## Debugging
 
