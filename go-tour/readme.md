@@ -735,6 +735,344 @@ func main() {
 }
 ```
 
+### Slices
+
+An array has a fixed size. A slice, on the other hand, is a dynamically-sized, flexible view into the elements of an array. In practice, slices are much more common than arrays.
+
+The type `[]T` is a clice with elements of type `T`.
+
+A slice is formed by specifying two indices, a low and high bound, separated by a colon:
+
+```go
+a[low : high]
+```
+
+This selects a half-open range which includes the first element, but excludes the last one.
+
+The following expression creates a slice which includes elements 1 through 3 of `a`:
+
+```go
+primes := [6]int{2, 3, 5, 7, 11, 13}
+
+var s []int = primes[1:4]
+// [3 5 7]
+```
+
+A slice does not store any data, it just describes a section of an underlying array.
+
+Changing the elements of a slice modifies the corresponding elements of its underlying array.
+
+Other slices that share the same underlying array will see those changes:
+
+```go
+names := [4]string{
+    "John",
+    "Paul",
+    "George",
+    "Ringo",
+}
+
+fmt.Println(names)
+// [John Paul George Ringo]
+
+a := names[0:2]
+b := names[1:3]
+fmt.Println(a, b)
+// [John Paul] [Paul George]
+
+b[0] = "XXX"
+fmt.Println(a, b)
+// [John XXX] [XXX George]
+fmt.Println(names)
+// [John XXX George Ringo]
+```
+
+A slice literal is like an array literal without the length.
+
+This is an array literal:
+
+```go
+[3]bool{true, true, false}
+```
+
+And this creates the same array as above, then biulds a slice that references it:
+
+```go
+[]bool{true, true, false}
+```
+
+```go
+q := []int {2, 3, 5, 7, 11, 13}
+
+r := []bool {true, false, true, true, false, true}
+
+s := []struct {
+    i int
+    b bool
+} {
+    {2, true},
+    {3, false},
+    {5, true},
+    {7, true},
+    {11, false},
+    {13, true}
+}
+```
+
+When slicing, you may omit the high or low bounds to use their defaults instead.
+
+The default is zero for the low bound and the length of the slice for the high bound.
+
+For the array:
+
+```go
+var a [10]int
+```
+
+these slice expressions are equivalent:
+
+```go
+a[0:10]
+a[:10]
+a[0:]
+a[:]
+```
+
+A slice has both a *length* and a *capacity*.
+
+The length of a slice is the number of elements it contains.
+
+The capacity of a slice is the number of elements in the underlying array, counting from the first element in the slice.
+
+The length and capacity of a slice `s` can be obtained using the expressions `len(2)` and `cap(s)`.
+
+You can extend a slice's length by re-slicing it, provided it has sufficient capacity.
+
+```go
+s := []int{2, 3, 5, 7, 11, 13}
+printSlice(s)
+// len=6 cap=6 [2 3 5 7 11 13]
+
+s = s[:0]
+printSlice(s)
+// len=0 cap=6 []
+
+s = s[:4]
+printSlice(s)
+// len=4 cap=6 [2 3 5 7]
+
+s = s[2:]
+printSlice(s)
+// len=2 cap=4 [5 7]
+
+func printSlice(s []int) {
+    fmt.Printf(
+        "len=%d cap=%d %v\n",
+        len(s), cap(s), s,
+    )
+}
+```
+
+The zero value of a slice is `nil`.
+
+A nil slice has a length and capacity of 0 and has no underlying array:
+
+```go
+var s []int
+fmt.Println(s, len(s), cap(s))
+// [] 0 0
+if s == nil {
+    fmt.Println("nil!")
+}
+// nil!
+```
+
+Slices can be created with the built-in `make` function; this is how you create dynamically-sized arrays.
+
+The `make` function allocates a zeroed array and returns a slice that refers to that array:
+
+```go
+a := make([]int, 5) // len(a)=5
+```
+
+To specify a capacity, pass a third argument to `make`:
+
+```go
+b := make([]int, 0, 5) // len(b)=0, cap(b)=5
+
+a = b[:cap(b)]  // len(b)=5, cap(b)=5
+b = b[1:]       // len(b)=4, cap(b)=4
+```
+
+Slices can contain any type, including other slices:
+
+```go
+board := [][]string{
+    []string{"_", "_", "_"},
+    []string{"_", "_", "_"},
+    []string{"_", "_", "_"},
+}
+
+board[0][0] = "X"
+board[2][2] = "O"
+board[1][2] = "X"
+board[1][0] = "O"
+board[0][2] = "X"
+
+for i := 0; i < len(board); i++ {
+    fmt.Printf("%s\n", strings.Join(board[i], " "))
+}
+
+/*
+    X _ X
+    O _ X
+    _ _ O
+*/
+```
+
+It is common to append new elements to a slice, and so Go provides a built-in `append` function. The [documentation](https://go.dev/pkg/builtin/#append) of hte built-in package describes `append`.
+
+```go
+func append(s []T, vs ...T) []T
+```
+
+The first parameter `s` of `append` is a slice of type `T`, and the rest are `T` values to append to the slice.
+
+The resulting value of `append` is a slice containing all the elements of the original slice plus the provided values.
+
+If the backing array of `s` is too small to fit all the given values, a bigger array will be allocated. The returned slice will point to the newly allocated array.
+
+(To learn more about slices, read the [Slices: usage and internals](https://go.dev/blog/slices-intro) article).
+
+```go
+var s []int
+printSlice(s)
+// len=0 cap=0 []
+
+// append works on nil slices
+s = append(s, 0)
+printSlice(s)
+// len=1 cap=1 [0]
+
+s = append(s, 1)
+printSlice(s)
+// len=2 cap=2 [0 1]
+
+s = append(s, 2, 3, 4)
+printSlice(s)
+// len=5 cap=6 [0 1 2 3 4]
+
+func printSlice(s []int) {
+    fmt.Printf(
+        "len=%d cap=%d %v\n",
+        len(s), cap(s), s,
+    )
+}
+```
+
+### Range
+
+The `range` form of the `for` loop iterates over a slice or map.
+
+When ranging over a slice, two values are returned for each iteration: the index, and a copy of the element at that index:
+
+```go
+var pow = []int{1, 2, 4, 8, 16, 32, 64, 128}
+
+for i, v := range pow {
+    fmt.Printf("2^%d = %d\n", i, v)
+}
+
+/*
+    2^0 = 1
+    2^1 = 2
+    2^2 = 4
+    2^3 = 8
+    2^4 = 16
+    2^5 = 32
+    2^6 = 64
+    2^7 = 128
+*/
+```
+
+You can skip the index or value by assigning to `_`:
+
+```go
+for i, _ := range pow
+for _, value := range pow
+```
+
+If you only wnat the index, you can omit the second variable:
+
+```go
+for i := range pow
+```
+
+### Exercises: Slices
+
+```go
+package main
+
+import "golang.org/x/tour/pic"
+
+func Pic(dx, dy int) [][]uint8 {
+	p := make([][]uint8, dy)
+	
+	for i := 0; i < dy; i++ {
+		p[i] = make([]uint8, dx)
+		
+		for j := 0; j < dx; j++ {
+			// p[i][j] = uint8((j+i) / 2)
+			// p[i][j] = uint8(j*i)
+			p[i][j] = uint8(j^i)
+		}
+	}
+	
+	return p
+}
+
+func main() {
+	pic.Show(Pic)
+}
+```
+
+**(x + y) / 2**
+
+![(x + y) / 2](./assets/slices/x-plus-y-div-2.png)
+
+**x * y**
+
+![x * y](./assets/slices/x-times-y.png)
+
+**x^y**
+
+![x^y](./assets/slices/x-pow-y.png)
+
+### Maps
+
+A map maps keys to values.
+
+The zero value of a map is `nil`. A `nil` map has no keys, nor can keys be added.
+
+The `make` function returns a map of the given type, initialized and ready for use.
+
+```go
+type Vertex struct {
+    Lat, Long float64
+}
+
+var m map[string]Vertex
+
+func main() {
+    m = make(map[string]Vertex)
+    m["Bell Labs"] = Vertex{
+        40.68433, -74.39967,
+    }
+    fmt.Println(m["Bell Labs"])
+    // {40.68433 -74.39967}
+}
+```
+
 ## Methods and Interfaces
 
 ## Generics
