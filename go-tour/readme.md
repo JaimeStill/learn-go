@@ -1036,17 +1036,11 @@ func main() {
 }
 ```
 
-**(x + y) / 2**
-
-![(x + y) / 2](./assets/slices/x-plus-y-div-2.png)
-
-**x * y**
-
-![x * y](./assets/slices/x-times-y.png)
-
-**x^y**
-
-![x^y](./assets/slices/x-pow-y.png)
+Formula | Result
+--------|-------
+`(x + y) / 2` | ![(x + y) / 2](./assets/slices/x-plus-y-div-2.png)
+`x * y` | ![x * y](./assets/slices/x-times-y.png)
+`x^y` | ![x^y](./assets/slices/x-pow-y.png)
 
 ### Maps
 
